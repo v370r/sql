@@ -1,0 +1,296 @@
+[2021-08-27]
+Notes:
+Ideas:
+TODO:
+Activity Log:
+
+Helpful commands in groom:
+    ; to end line
+    \c to revert change that passesed and clear it
+    - mysql-ctl cli (do it in same folder to run)
+    - run file from file using comand line
+        create database <dbname>;
+        use database <dbname>;
+        source <file name>;
+    - exit (to exit mysql)
+DataBase Operations:
+    use <db_name>
+    create <db_name>
+    select <db_name>
+    drop <db_name>
+
+Order of usage:
+    - show databases;
+    - create database <dbname>
+    - use <db_name>
+    - select database()  {shows the database currently using}
+    - create table <table_name>(
+        ...,
+    )
+    - DESC <table_name> (its describe !not descending!)
+    - drop table <table_name>
+    - Run files in mysql using command line
+        - source /workspace/mysql/test/query.sql
+    - use ctrl+L to clear screen!
+    - SHOW WARNINGS; (to check warnings) (works only after error warnings if u use other commands the warnings shows empty;)
+    - SHOW PROCESSLIST ;(shows what sql process running )
+    - KILL <process_id>
+
+[√] SQL getting started
+    SQL = structured quey language
+    Definitions:
+        DataBase:
+            Def: A structured set of computerized data with an accessible interface
+            collection of data 
+        
+        Database vs DataBase management system
+        Your App ==> DBMS ==> Database
+
+        DBMS :  
+                PostgreSQL         MySQL
+                Oracle Database    SQLite
+
+        SQL vs MySQL (DBMS)
+
+        [MySQL]
+             SELECT * FROM Users WHERE AGE>=18
+        [end]
+
+        [PostgreSQL]
+            SELECT * FROM Users WHERE AGE>=18
+        [end]
+
+
+
+SQL commands used:
+        cats:
+            INSERT INTO cats(name,age) VALUES ("Blue",1)
+            INSERT INTO cats (age,name) VALUES (1, "Blue") both are same
+
+        - Mutiple value insetion:
+            INSERT INTO cats(name,age) VALUES ("Charlie",10),("Sadie",3),("Lazy Bear",1); 
+            SHOW WARNINGS; (to check warnings)
+        - cats3:
+             CREATE TABLE cats4
+              (   cat_id INT NOT NULL AUTO_INCREMENT,  || or can use primary KEY here itself!
+                  name VARCHAR(100) NOT NULL DEFAULT "unnamed",
+                  age INT NOT NULL DEFAULT 99 ,
+                  PRIMARY KEY (cat_id)
+              );
+
+        - Aliases:
+             just changing the name of table for views
+             SELECT cat_id AS id, name FROM cats;
+             SELECT cat_id AS id, name as "cat name" FROM cats; //can use double quotes for as
+
+
+CRUD :
+    Create 
+    Read
+    Update 
+    Delete
+
+    - DROP TABLE cats;
+    - READ :
+        select * from cats;
+        select * from cats where age>=4;
+                                 name ="Egg"
+                                 name ="egg"  | by default case insensitive it gives ans 
+        select distinct author_lname from books;
+        select distinct CONCAT(author_fname," ",author_lname) from books;
+        select distinct author_fname,author_lname from books;
+        select author_lname from books order by author_lname asc/desc;
+        select title,author_fname,author_lname from order by 2; (here 2 refers to 2nd one author_fname)
+        select title,author_fname,author_lname from order by author_fname,author_lname;
+                            (we can do two order by's !first priority to fname!
+                                                       !second priority to lname!)
+
+        select * from books limit 10;
+        select CONCAT(UPPER(author_fname)," ",LOWER(author_lname)) as name from books;
+
+
+        !5 most recently released books!
+            select * from books order by released_year desc limit 5;
+            select * from books order by released_year desc limit 0,5; 0-starting point
+                                                                       5 -how my u want!
+                        second most 
+                           1,1 gives 1 | 1,2  gives 2ndand 3rd
+        !want to show 95th to last!
+            select * from books order by released_year desc limit 95,<random large enough number>
+        !Like!
+            select * from books where author_fname like "%da%" ;(anything+ da + anything can match all upper Da and lower da)
+            CHECK NOOF characters using _ can even be used for digits:
+                - where author_fname like "____" (yes it 4_ gives 4 character names) 
+            US number like (235)234-0987 is like "(___)___-____"
+            IfitHas%sign:
+                like "%\%%" use backslash!
+                like "% %" with space!
+
+
+
+        
+    - Update:
+        UPDATE cats SET breed="Shorthair" WHERE breed ="Tabby";
+        UPDATE cats SET age = 14 WHERE name = "Misty";
+        update shirts set shirt_size = "XS" ,color= "off white" where color ="white";
+
+
+    - Delete:
+        DELETE FROM cats WHERE name ="Egg";
+        DELETE FROM cats ; (deletes all cats)
+
+Aggregate function:
+    COUNT:
+        how many books?
+        sol) select count(*) from books;
+            SELECT COUNT(DISTINCT OrderID) FROM [OrderDetails]
+
+        SELECT COUNT(*) FROM books where title like "%the%"
+
+
+    GroupBy:
+        SELECT author_lname,COUNT(*) from books Group BY author_lname;
+        SELECT EmployeeID,COUNT( DISTINCT CustomerID) FROM [Orders] GROUP BY EmployeeID
+        !critical!
+        SELECT author_fname,author_lname,count(*) from books group by author_lname,author_lname;
+    
+    MAX,MIN:
+        SELECT MAX(pages),title from books; //wrong! gives max pages but gives first title no coordination
+        correct:
+            select * from books where pages = (select min/max(pages) from books);
+             or
+            select * from books ORDER BY pages ASC LIMIT 1;
+            SELECT author_fname,author_lname,MAX(pages) FROM books GROUP BY author_lname,author_fname;
+
+            select 
+                CONCAT(author_fname," ",author_lname) AS author,
+                MAX(pages) AS "longest book" 
+            FROM books
+            GROUP BY author_lname,author_fname;
+
+    SUM:
+    AVG:
+
+    CAST:
+            SELECT CAST("2017-02-01" AS DATETIME);
+            WE CAN use:
+                    select name,birthday from people where birthday between "1980-02-05" and "2000-02-05";
+                    it works! sql is smart enough
+
+                    select name,birthday from people where birthday between cast("1980-02-05" as DATETIME) and cast("2000-02-05" as DATETIME);
+    IN:
+        instead of this :
+            SELECT 
+                title, 
+                author_lname 
+            FROM books
+            WHERE author_lname='Carver' OR
+                author_lname='Lahiri' OR
+                author_lname='Smith';
+        use this:
+            SELECT title, author_lname FROM books
+                WHERE author_lname IN ('Carver', 'Lahiri', 'Smith');
+    Not in:
+        SELECT title, released_year FROM books
+            WHERE released_year != 2000 AND
+                released_year != 2002 AND
+                released_year != 2004 AND
+                released_year != 2006 AND
+                released_year != 2008 AND
+                released_year != 2010 AND
+                released_year != 2012 AND
+                released_year != 2014 AND
+                released_year != 2016;
+            
+        SELECT title, released_year FROM books
+            WHERE released_year NOT IN 
+            (2000,2002,2004,2006,2008,2010,2012,2014,2016);
+
+
+        SELECT title, released_year FROM books
+            WHERE released_year >= 2000
+            AND released_year NOT IN 
+            (2000,2002,2004,2006,2008,2010,2012,2014,2016);
+            
+            SELECT title, released_year FROM books
+            WHERE released_year >= 2000 AND
+            released_year % 2 != 0;
+    CASE:
+        select title,released_year ,
+                case 
+                    when released_year between 2000 and 2015 then  "Modern List"
+                    when released_year between 1945 and 2000 then  "Slightly old List"  (can have many!)
+                    else "20th century lit" 
+                end as genre
+        from books
+
+
+    SUBSTR:
+        select title,author_lname from books where SUBSTR(author_lname,1,1) in ("C","S"); ( INSTEAD OF USING LIKE)
+        select title,author_lname from books where SUBSTR(author_lname,1,1) = "C" OR SUBSTR(author_lname,1,1) = "S"
+
+    CURDATE() :
+       gives current date
+
+    YEAR(4); data type!
+
+    DECIMAL(P,Q)
+            TOTAL DIGITS P ,AND Q after dcimal points p>q 2,1 is 4.1 total 2
+    Handle null:
+            select avg(coalesce(some_column, 0))
+                from ...
+One to many and many to many:
+        usage of foreign key!:
+            
+            CREATE TABLE customers(
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                first_name VARCHAR(100),
+                last_name VARCHAR(100),
+                email VARCHAR(100)
+            );
+            CREATE TABLE orders(
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                order_date DATE,
+                amount DECIMAL(8,2),
+                customer_id INT,
+                FOREIGN KEY(customer_id) REFERENCES customers(id)
+                on DELETE CASCADE          -- (deletes reference from orders too)
+            );
+
+
+Joins:
+    *cross join*:
+        select * from customers,orders ;  (gives multiplication of rows) !bad!
+    
+    *Inner Join*:
+        crude:  
+        [!] select * from customers,orders where id =customer_id; !wrong!
+        [ ] select * from customers as c,orders as o where c.id = o.customer_id;  !correct but not efficient!
+        [√] select * from customers join orders on customers.id = orders.customer_id;
+        [√] select * from customers inner join orders on customers.id = orders.customer_id ; inner is optional
+    
+    *Left join*:
+        select * from customers left join orders on customers.id = orders.customer_id ;
+
+        SELECT first_name,last_name,IFNULL(SUM(amount),0) as expense
+        FROM customers 
+        LEFT JOIN orders 
+            on customers.id = orders.customer_id
+        GROUP BY customers.id
+
+        rating is null not rating = null
+
+        said, null = null is not correct. It will return NULL(false)
+
+                For null comparison you must use IS NULL or IS NOT NULL
+
+    *Right Join*
+
+
+
+
+Note:
+    - If we pass invalid values varchar instead of int it will save default value in db like for int 0 ..
+    - You cant delets customers without deleting orders since foreign key constraint!
+            - only was is to delete orders than delete customers or drop table orders,customers
+
